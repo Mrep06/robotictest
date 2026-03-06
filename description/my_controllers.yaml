@@ -19,8 +19,24 @@ arm_controller:
       - position
     state_interfaces:
       - position
-      # ลบหรือใส่คอมเมนต์ - velocity ออก เพราะ URDF ของคุณไม่มี interface นี้สำหรับทุก joint
-      # เพื่อให้ controller สามารถ activate ได้โดยไม่ติด error เรื่อง key missing
+
+    # ส่วนที่เพิ่มเข้ามา: PID Gains สำหรับควบคุมแรงพยายามของแต่ละข้อต่อ
+    gains:
+      arm_base2_joint:
+        p: 1500.0  # แรงพยายามยก (ตั้งค่าสูงเพื่อสู้แรงโน้มถ่วง)
+        i: 10.0    # ช่วยรักษาตำแหน่งไม่ให้แขนตกลงมา
+        d: 100.0   # ลดการสั่นสะเทือนขณะยก
+        i_clamp: 1.0
+      arm_slide_joint_L:
+        p: 800.0   # แรงพยายามหนีบกล่อง
+        i: 5.0     # ช่วยให้หนีบแน่นขึ้นเรื่อยๆ จนกว่าจะถึงระยะ
+        d: 20.0    # ลดการกระชากขณะหนีบ
+        i_clamp: 1.0
+      arm_slide_joint_R:
+        p: 800.0
+        i: 5.0
+        d: 20.0
+        i_clamp: 1.0
 
     state_publish_rate: 100.0
     action_monitor_rate: 20.0

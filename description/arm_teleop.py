@@ -30,7 +30,7 @@ class ArmTeleop(Node):
         self.slide_pos = 0.0
         
         # ขีดจำกัดจากไฟล์ robot_core.xacro
-        self.base2_limit = [0, 0.2] #
+        self.base2_limit = [0.0, 0.2] #
         self.slide_limit = [0.0, 0.25375] #
 
     def send_command(self):
