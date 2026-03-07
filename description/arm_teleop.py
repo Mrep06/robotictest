@@ -13,8 +13,8 @@ Moving Base2 (Up/Down):
     s : Down (-0.01)
 
 Moving Slides (L/R):
-    a : Slide Out (+0.01)
-    d : Slide In (-0.01)
+    a : Slide In (+0.01)
+    d : Slide Out (-0.01)
 
 space or k : Force Stop (Reset to 0)
 CTRL-C to quit
