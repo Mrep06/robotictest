@@ -206,7 +206,7 @@
     <child link="arm_base2"/>
     <origin xyz="0.05 0 0.025" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="0" upper="0.2" effort="500" velocity="1.0"/>
+    <limit lower="0" upper="0.2" effort="1000" velocity="1.0"/>
 </joint>
 
 <link name="arm_base2">
@@ -235,7 +235,7 @@
     <child link="arm_link_L"/>
     <origin xyz="0 -0.26375 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="0" upper="0.26375" effort="400" velocity="1.0"/>
+    <limit lower="0" upper="0.26375" effort="1000" velocity="1.0"/>
 </joint>
 
 <link name="arm_link_L">
@@ -273,7 +273,7 @@
     <child link="arm_link_R"/>
     <origin xyz="0 0.26375 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-0.26375" upper="0" effort="400" velocity="1.0"/>
+    <limit lower="-0.26375" upper="0" effort="1000" velocity="1.0"/>
 </joint>
 
 <link name="arm_link_R">
