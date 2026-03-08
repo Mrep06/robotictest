@@ -56,4 +56,8 @@
         </joint>
     </ros2_control>
 
+    <gazebo>
+        <plugin name="gazebo_link_attacher" filename="libgazebo_link_attacher.so"/>
+    </gazebo>
+
 </robot>

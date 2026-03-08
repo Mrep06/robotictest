@@ -3,9 +3,10 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
+from linkattacher_msgs.srv import AttachLink, DetachLink # <--- เพิ่ม Import สำหรับ Service ของปลั๊กอิน
 import sys, select, termios, tty
 
-# คำอธิบายปุ่มควบคุม
+# คำอธิบายปุ่มควบคุม (เพิ่ม c และ v เข้ามา)
 msg = """
 Control Your Robot and Arm!
 ---------------------------
@@ -14,6 +15,10 @@ Moving Robot (Base):        Moving Arm (Lift/Grip):
     s : Backward                k : Arm Down (-0.01)
     a : Left                    j : Slide In (+0.01)
     d : Right                   l : Slide Out (-0.01)
+
+Plugin (Grasp):
+    c : Attach Object (จับวัตถุ)
+    v : Detach Object (ปล่อยวัตถุ)
 
 space or x : Stop All (Robot & Arm)
 CTRL-C to quit
@@ -26,6 +31,10 @@ class CombinedTeleop(Node):
         self.wheel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         # Publisher สำหรับแขน
         self.arm_pub = self.create_publisher(JointTrajectory, '/arm_controller/joint_trajectory', 10)
+        
+        # สร้าง Service Client สำหรับสั่งจับและปล่อย (Plugin IFRA Link Attacher)
+        self.attach_cli = self.create_client(AttachLink, '/ATTACHLINK')
+        self.detach_cli = self.create_client(DetachLink, '/DETACHLINK')
         
         # สถานะเริ่มต้นของแขน
         self.base2_pos = 0.0
@@ -52,6 +61,36 @@ class CombinedTeleop(Node):
         twist.linear.x = linear
         twist.angular.z = angular
         self.wheel_pub.publish(twist)
+
+    # ฟังก์ชันสำหรับจับวัตถุ
+    def attach_object(self):
+        if not self.attach_cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().warn('ATTACHLINK service not available!')
+            return
+            
+        req = AttachLink.Request()
+        req.model1_name = 'robot779'      # ชื่อหุ่นยนต์ของคุณใน Gazebo
+        req.link1_name = 'arm_slide_L'    # ชื่อ Link ปลายแขนของหุ่น (ต้องแก้ให้ตรงกับ URDF ของคุณ)
+        req.model2_name = 'box_final1'    # ชื่อวัตถุเป้าหมายใน Gazebo
+        req.link2_name = 'link_1'       # ชื่อ Link ของวัตถุเป้าหมาย
+        
+        self.attach_cli.call_async(req)
+        print("\n--> Sent ATTACH command! (พยายามจับวัตถุ)\n")
+
+    # ฟังก์ชันสำหรับปล่อยวัตถุ
+    def detach_object(self):
+        if not self.detach_cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().warn('DETACHLINK service not available!')
+            return
+            
+        req = DetachLink.Request()
+        req.model1_name = 'robot779'
+        req.link1_name = 'arm_slide_L'
+        req.model2_name = 'box_final1'
+        req.link2_name = 'link_1'
+        
+        self.detach_cli.call_async(req)
+        print("\n--> Sent DETACH command! (ปล่อยวัตถุ)\n")
 
 def get_key(settings):
     tty.setraw(sys.stdin.fileno())
@@ -94,6 +133,12 @@ def main():
             elif key == 'l':
                 node.slide_pos = max(node.slide_limit[0], node.slide_pos - 0.01)
                 node.send_arm_command()
+                
+            # ปุ่มสำหรับจับ/ปล่อยวัตถุ (c/v)
+            elif key == 'c':
+                node.attach_object()
+            elif key == 'v':
+                node.detach_object()
                 
             # หยุดทุกอย่าง
             elif key in [' ', 'x']:
